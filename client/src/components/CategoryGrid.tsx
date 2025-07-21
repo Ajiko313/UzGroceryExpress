@@ -18,53 +18,52 @@ interface CategoryGridProps {
 
 export function CategoryGrid({ categories, selectedCategory, onCategorySelect }: CategoryGridProps) {
   return (
-    <div className="px-4 py-4">
-      <h2 className="text-lg font-semibold mb-4">Kategoriyalar</h2>
-      <div className="grid grid-cols-2 gap-2">
-        {/* All Categories Card */}
-        <Card 
-          className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-            selectedCategory === null ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md'
+    <div className="px-4 py-2">
+      <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-2 scroll-smooth">
+        {/* All Categories Button */}
+        <button
+          className={`flex-shrink-0 flex flex-col items-center p-2 rounded-lg transition-all duration-200 min-w-[60px] category-btn ${
+            selectedCategory === null 
+              ? 'bg-primary text-primary-foreground shadow-md' 
+              : 'bg-muted hover:bg-muted/80'
           }`}
           onClick={() => onCategorySelect(null)}
         >
-          <CardContent className="p-2">
-            <div className="h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-2 flex items-center justify-center">
-              <span className="text-xl">🛍️</span>
-            </div>
-            <h3 className="font-medium text-xs text-center">Barchasi</h3>
-          </CardContent>
-        </Card>
+          <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-1 flex items-center justify-center">
+            <span className="text-lg">🛍️</span>
+          </div>
+          <span className="text-xs font-medium text-center">Barchasi</span>
+        </button>
 
-        {/* Category Cards */}
+        {/* Category Buttons */}
         {categories.map((category) => (
-          <Card 
+          <button
             key={category.id}
-            className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
-              selectedCategory === category.id ? 'ring-2 ring-primary shadow-lg' : 'hover:shadow-md'
+            className={`flex-shrink-0 flex flex-col items-center p-2 rounded-lg transition-all duration-200 min-w-[60px] category-btn ${
+              selectedCategory === category.id 
+                ? 'bg-primary text-primary-foreground shadow-md' 
+                : 'bg-muted hover:bg-muted/80'
             }`}
             onClick={() => onCategorySelect(category.id)}
           >
-            <CardContent className="p-2">
-              <div className="h-16 rounded-lg mb-2 overflow-hidden bg-muted">
-                {category.image ? (
-                  <img 
-                    src={category.image} 
-                    alt={category.nameUz}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
-                    <span className="text-xl">📦</span>
-                  </div>
-                )}
-              </div>
-              <h3 className="font-medium text-xs text-center line-clamp-2">
-                {category.nameUz}
-              </h3>
-            </CardContent>
-          </Card>
+            <div className="w-10 h-10 rounded-lg mb-1 overflow-hidden bg-background">
+              {category.image ? (
+                <img 
+                  src={category.image} 
+                  alt={category.nameUz}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
+                  <span className="text-lg">📦</span>
+                </div>
+              )}
+            </div>
+            <span className="text-xs font-medium text-center line-clamp-1">
+              {category.nameUz}
+            </span>
+          </button>
         ))}
       </div>
     </div>

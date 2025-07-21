@@ -122,21 +122,18 @@ export default function Home() {
         <SpecialOffersBanner />
       </div>
 
-      {/* Category Grid - Show when no search/filter active */}
-      {showCategoryGrid && !filters.query && filters.category === 'all' && (
-        <CategoryGrid 
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={(categoryId) => {
-            setSelectedCategory(categoryId);
-            setFilters(prev => ({ 
-              ...prev, 
-              category: categoryId ? categoryId.toString() : 'all' 
-            }));
-            setShowCategoryGrid(false);
-          }}
-        />
-      )}
+      {/* Category Tabs - Always show */}
+      <CategoryGrid 
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategorySelect={(categoryId) => {
+          setSelectedCategory(categoryId);
+          setFilters(prev => ({ 
+            ...prev, 
+            category: categoryId ? categoryId.toString() : 'all' 
+          }));
+        }}
+      />
 
       {/* Sticky Search Section - Moved up to close gap */}
       <div className={`sticky top-16 z-40 transition-all duration-300 bg-background border-b border-border/50 -mt-2`}>
@@ -149,41 +146,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sticky Category Tabs - Show when category grid is hidden */}
-      {!showCategoryGrid && (
-        <div className={`sticky top-[7.5rem] z-30 transition-all duration-300 bg-background border-b border-border`}>
-          <div className="px-4 py-3">
-            <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
-              <Button
-                variant={selectedCategory === null ? "default" : "secondary"}
-                size="sm"
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setFilters(prev => ({ ...prev, category: 'all' }));
-                  setShowCategoryGrid(true);
-                }}
-                className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
-              >
-                Barchasi
-              </Button>
-              {categories.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "secondary"}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setFilters(prev => ({ ...prev, category: category.id.toString() }));
-                  }}
-                  className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
-                >
-                  {category.nameUz}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Results Summary */}
       {!isLoading && (
@@ -200,18 +163,18 @@ export default function Home() {
       {/* Products Grid */}
       <div className="px-4 py-4">
         {isLoading ? (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-card rounded-lg p-4 animate-pulse">
-                <div className="bg-muted h-40 rounded-lg mb-3"></div>
-                <div className="bg-muted h-4 rounded mb-2"></div>
-                <div className="bg-muted h-3 rounded mb-2 w-2/3"></div>
-                <div className="bg-muted h-5 rounded w-1/3"></div>
+              <div key={i} className="bg-card rounded-lg p-3 animate-pulse">
+                <div className="bg-muted h-32 rounded-lg mb-2"></div>
+                <div className="bg-muted h-3 rounded mb-1"></div>
+                <div className="bg-muted h-3 rounded mb-1 w-2/3"></div>
+                <div className="bg-muted h-4 rounded w-1/2"></div>
               </div>
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {filteredProducts.map((product, index) => (
               <div 
                 key={product.id}

@@ -124,8 +124,11 @@ The application uses a multi-table PostgreSQL schema:
 - **Authentication**: Implemented automatic Telegram WebApp authentication with user context
 - **Environment Configuration**: Created comprehensive .env file with all necessary API keys and configurations
 
-### User Preferences
-- Prefers 2-column grid layout for categories with minimized picture sizes
+### User Preferences  
+- Prefers 2-column product grid layout for main page
+- Categories should be horizontal scrollable tabs with minimized pictures (40px x 40px)
+- Categories should always be visible and under admin control
+- Category images should persist during filtering and sorting operations
 
 ### Architecture Updates
 - Added `server/telegram.ts` for Telegram bot functionality

@@ -26,7 +26,7 @@ export function ProductCard({ product, onAddToCart, isAddingToCart }: ProductCar
   };
 
   return (
-    <Card className="bg-card-bg border border-gray-100 rounded-xl overflow-hidden">
+    <Card className="bg-card-bg border border-gray-100 rounded-xl overflow-hidden product-card">
       <CardContent className="p-3">
         {product.image && (
           <img 
