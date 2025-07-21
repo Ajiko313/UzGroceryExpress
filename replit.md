@@ -119,9 +119,13 @@ The application uses a multi-table PostgreSQL schema:
   - Fixed gap between header and search bar by adding negative margin
   - Added attractive category photos with optimized Unsplash images
   - Implemented CategoryGrid component for better user experience
+  - Updated category grid to 2 columns with minimized pictures (fixed height of 16)
   - Added Telegram notification sender component for admin use
 - **Authentication**: Implemented automatic Telegram WebApp authentication with user context
 - **Environment Configuration**: Created comprehensive .env file with all necessary API keys and configurations
+
+### User Preferences
+- Prefers 2-column grid layout for categories with minimized picture sizes
 
 ### Architecture Updates
 - Added `server/telegram.ts` for Telegram bot functionality

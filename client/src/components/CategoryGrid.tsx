@@ -20,7 +20,7 @@ export function CategoryGrid({ categories, selectedCategory, onCategorySelect }:
   return (
     <div className="px-4 py-4">
       <h2 className="text-lg font-semibold mb-4">Kategoriyalar</h2>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {/* All Categories Card */}
         <Card 
           className={`cursor-pointer transition-all duration-200 hover:scale-105 ${
@@ -28,11 +28,11 @@ export function CategoryGrid({ categories, selectedCategory, onCategorySelect }:
           }`}
           onClick={() => onCategorySelect(null)}
         >
-          <CardContent className="p-3">
-            <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-2 flex items-center justify-center">
-              <span className="text-2xl">🛍️</span>
+          <CardContent className="p-2">
+            <div className="h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg mb-2 flex items-center justify-center">
+              <span className="text-xl">🛍️</span>
             </div>
-            <h3 className="font-medium text-sm text-center">Barchasi</h3>
+            <h3 className="font-medium text-xs text-center">Barchasi</h3>
           </CardContent>
         </Card>
 
@@ -45,8 +45,8 @@ export function CategoryGrid({ categories, selectedCategory, onCategorySelect }:
             }`}
             onClick={() => onCategorySelect(category.id)}
           >
-            <CardContent className="p-3">
-              <div className="aspect-square rounded-lg mb-2 overflow-hidden bg-muted">
+            <CardContent className="p-2">
+              <div className="h-16 rounded-lg mb-2 overflow-hidden bg-muted">
                 {category.image ? (
                   <img 
                     src={category.image} 
@@ -56,11 +56,11 @@ export function CategoryGrid({ categories, selectedCategory, onCategorySelect }:
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-muted to-muted-foreground/20 flex items-center justify-center">
-                    <span className="text-2xl">📦</span>
+                    <span className="text-xl">📦</span>
                   </div>
                 )}
               </div>
-              <h3 className="font-medium text-sm text-center line-clamp-2">
+              <h3 className="font-medium text-xs text-center line-clamp-2">
                 {category.nameUz}
               </h3>
             </CardContent>
