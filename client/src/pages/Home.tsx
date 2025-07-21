@@ -56,7 +56,15 @@ export default function Home() {
   });
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products', filters.category, filters.query],
+    queryKey: ['/api/products', filters.category],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filters.category !== 'all') {
+        params.append('categoryId', filters.category);
+      }
+      const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
+      return fetch(url).then(res => res.json());
+    },
   });
 
   // Apply filters and sorting
