@@ -78,8 +78,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cart
   app.get("/api/cart", async (req, res) => {
     try {
-      // For demo, use user ID 1
-      const userId = 1;
+      const telegramId = req.query.telegramId || req.headers['x-telegram-id'];
+      let userId = 1; // fallback for demo
+      
+      if (telegramId) {
+        const user = await storage.getUserByTelegramId(telegramId as string);
+        if (user) {
+          userId = user.id;
+        }
+      }
+      
       const cartItems = await storage.getCartItems(userId);
       res.json(cartItems);
     } catch (error) {
@@ -89,8 +97,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/cart", async (req, res) => {
     try {
-      const userId = 1; // For demo
-      const { productId, quantity = 1 } = req.body;
+      const { productId, quantity = 1, telegramId } = req.body;
+      let userId = 1; // fallback for demo
+      
+      if (telegramId) {
+        const user = await storage.getUserByTelegramId(telegramId as string);
+        if (user) {
+          userId = user.id;
+        }
+      }
       
       const cartItem = await storage.addToCart({
         userId,
@@ -107,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/cart/:id", async (req, res) => {
     try {
       const cartItemId = parseInt(req.params.id);
-      const { quantity } = req.body;
+      const { quantity, telegramId } = req.body;
       
       await storage.updateCartItemQuantity(cartItemId, quantity);
       res.json({ success: true });
@@ -128,7 +143,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/cart", async (req, res) => {
     try {
-      const userId = 1; // For demo
+      const { telegramId } = req.body;
+      let userId = 1; // fallback for demo
+      
+      if (telegramId) {
+        const user = await storage.getUserByTelegramId(telegramId as string);
+        if (user) {
+          userId = user.id;
+        }
+      }
+      
       await storage.clearCart(userId);
       res.json({ success: true });
     } catch (error) {
@@ -279,8 +303,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.getUserByTelegramId(telegramId as string);
-      if (!user || user.role !== 'admin') {
-        return res.status(403).json({ message: "Admin access denied" });
+      if (!user || user.role !== 'admin' || user.telegramId !== '5155574276') {
+        return res.status(403).json({ message: "Admin access denied. Only authorized admin can access." });
       }
       
       req.adminUser = user;
@@ -300,8 +324,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const user = await storage.getUserByTelegramId(telegramId);
-      if (!user || user.role !== 'admin') {
-        return res.status(401).json({ message: "Invalid admin credentials" });
+      if (!user || user.role !== 'admin' || user.telegramId !== '5155574276') {
+        return res.status(401).json({ message: "Invalid admin credentials. Access restricted." });
       }
       
       res.json({ 

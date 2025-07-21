@@ -112,24 +112,25 @@ The application uses a multi-table PostgreSQL schema:
 
 ## Recent Changes
 
-### January 21, 2025 - Complete Migration & Bot Integration
-- **Database Migration**: ✅ Successfully migrated to user's custom Supabase PostgreSQL database (postgresql://postgres.yzfhiubqqkhrbqbhcjps@aws-0-eu-north-1.pooler.supabase.com:6543/postgres)
+### January 21, 2025 - Complete Migration & Critical Security Fixes
+- **Database Migration**: ✅ Successfully migrated to user's custom Supabase PostgreSQL database
 - **Telegram Bot Integration**: ✅ Complete Telegram Mini App bot setup with token 8040655774:AAHIVroG9bAmyKjv4P48IOqZRfJIzaVytXs
   - Mini App commands: /start (opens marketplace), /admin (admin panel), /orders (order tracking)
   - Webhook endpoint configured for real-time message handling
-  - Automatic user registration and authentication through Telegram
-- **Admin Access**: ✅ User granted full admin privileges (Telegram ID: 5155574276)
-  - Complete CRUD operations for categories, products, orders, users
-  - Special offers management and notification broadcasting
-  - Admin login endpoint functional with successful authentication
-- **API Enhancement**: Added comprehensive admin routes for full system control
-  - User management (create, update, deactivate)
-  - Order status management and delivery assignments
-  - Special offers and notifications CRUD operations
-- **TypeScript Fixes**: Resolved all LSP diagnostics and compilation errors
-- **Environment Configuration**: Complete .env setup with database and bot credentials
-- **Webhook Setup**: ✅ Telegram webhook successfully configured and processing commands
-- **Bot Commands Active**: /start, /admin, and /orders commands now fully functional
+  - Bot now greets users by their actual Telegram first names (e.g., "Assalomu alaykum, Azizbek!")
+- **Critical Security Implementation**: ✅ Admin access now strictly restricted to Telegram ID 5155574276 only
+  - Enhanced admin middleware with dual verification (role + specific Telegram ID)
+  - All admin endpoints protected with secure authentication
+  - Unauthorized access attempts properly rejected with clear error messages
+- **User Isolation Fixes**: ✅ Complete cart and user data separation implemented
+  - Each user now has their own isolated cart based on Telegram ID authentication
+  - Fixed cart queries to use proper user identification instead of hardcoded fallbacks
+  - All cart operations (add, update, remove, clear) now user-specific
+- **Enhanced Authentication**: ✅ Telegram user data properly integrated throughout the system
+  - Frontend hooks updated to pass Telegram IDs for all user-specific operations
+  - Cart isolation prevents users from seeing each other's cart items
+  - User authentication propagated to all relevant API endpoints
+- **Bot Commands Active**: ✅ /start, /admin, and /orders commands fully functional with personalized greetings
 
 ### User Preferences  
 - Prefers 2-column product grid layout for main page

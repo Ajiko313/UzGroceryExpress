@@ -96,7 +96,7 @@ export async function handleTelegramWebhook(req: any, res: any) {
           : 'https://3f306987-154e-43c1-95c7-23a8ebe4e4c1-00-373p6j1y25mqd.spock.replit.dev';
         
         await bot.sendMessage(chatId, 
-          `🛍️ Xush kelibsiz bizning yetkazib berish xizmatiga!\n\nBozorni ochish uchun quyidagi tugmani bosing:`, 
+          `🛍️ Assalomu alaykum, ${user.first_name}! Bizning yetkazib berish xizmatiga xush kelibsiz!\n\nBozorni ochish uchun quyidagi tugmani bosing:`, 
           {
             reply_markup: {
               inline_keyboard: [[
@@ -114,7 +114,7 @@ export async function handleTelegramWebhook(req: any, res: any) {
           : 'https://3f306987-154e-43c1-95c7-23a8ebe4e4c1-00-373p6j1y25mqd.spock.replit.dev/admin';
         
         await bot.sendMessage(chatId, 
-          `👨‍💼 Admin paneliga xush kelibsiz!`, 
+          `👨‍💼 Assalomu alaykum, ${user.first_name}! Admin paneliga xush kelibsiz!`, 
           {
             reply_markup: {
               inline_keyboard: [[
