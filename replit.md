@@ -113,8 +113,9 @@ The application uses a multi-table PostgreSQL schema:
 ## Recent Changes
 
 ### January 21, 2025 - Major Updates
-- **Database Migration**: Successfully migrated from built-in Replit database to user's custom Supabase PostgreSQL database
-- **Telegram Bot Integration**: Added full Telegram bot support with webhook handling, automatic user authentication, and broadcasting capabilities
+- **Database Migration**: Successfully migrated from built-in Replit database to user's custom Supabase PostgreSQL database (postgresql://postgres.yzfhiubqqkhrbqbhcjps@aws-0-eu-north-1.pooler.supabase.com:6543/postgres)
+- **Telegram Bot Integration**: Added full Telegram bot support with webhook handling, automatic user authentication, and broadcasting capabilities (Bot Token: 8040655774:AAHIVroG9bAmyKjv4P48IOqZRfJIzaVytXs)
+- **Admin Access**: Granted full admin privileges to user (Telegram ID: 5155574276) with complete CRUD access to all system components
 - **UI Enhancements**: 
   - Fixed gap between header and search bar by adding negative margin
   - Added attractive category photos with optimized Unsplash images

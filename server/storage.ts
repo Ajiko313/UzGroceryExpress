@@ -28,6 +28,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByTelegramId(telegramId: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(userId: number, updates: Partial<User>): Promise<void>;
 
   // Categories
   getCategories(): Promise<Category[]>;
@@ -100,6 +101,12 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const [newUser] = await db.insert(schema.users).values(user).returning();
     return newUser;
+  }
+
+  async updateUser(userId: number, updates: Partial<User>): Promise<void> {
+    await db.update(schema.users)
+      .set(updates)
+      .where(eq(schema.users.id, userId));
   }
 
   async getCategories(): Promise<Category[]> {
