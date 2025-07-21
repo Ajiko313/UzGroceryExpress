@@ -68,21 +68,25 @@ export async function handleTelegramWebhook(req: any, res: any) {
 
   try {
     const update = req.body;
+    console.log('📨 Received Telegram update:', JSON.stringify(update, null, 2));
     
     if (update.message) {
       const chatId = update.message.chat.id;
       const text = update.message.text;
       const user = update.message.from;
       
+      console.log(`💬 Processing message: ${text} from user ${user.id}`);
+      
       // Create or find user in database
       let dbUser = await storage.getUserByTelegramId(user.id.toString());
       if (!dbUser) {
+        console.log(`👤 Creating new user: ${user.id}`);
         dbUser = await storage.createUser({
           telegramId: user.id.toString(),
           username: user.username,
           firstName: user.first_name,
           lastName: user.last_name,
-          role: 'customer'
+          role: user.id.toString() === '5155574276' ? 'admin' : 'customer'
         });
       }
 
