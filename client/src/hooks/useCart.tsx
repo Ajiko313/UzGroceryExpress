@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { hapticFeedback } from '@/lib/telegram';
 import { useToast } from '@/hooks/use-toast';
+import { useTelegramAuth } from '@/hooks/useTelegramAuth';
 
 interface CartItem {
   id: number;
@@ -20,18 +21,29 @@ interface CartItem {
 export function useCart() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useTelegramAuth();
 
   const { data: cartItems = [], isLoading } = useQuery<CartItem[]>({
-    queryKey: ['/api/cart'],
+    queryKey: ['/api/cart', user?.id],
+    queryFn: async () => {
+      const telegramId = user?.id?.toString();
+      const url = telegramId ? `/api/cart?telegramId=${telegramId}` : '/api/cart';
+      const response = await fetch(url);
+      return response.json();
+    },
   });
 
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity = 1 }: { productId: number; quantity?: number }) => {
-      const response = await apiRequest('POST', '/api/cart', { productId, quantity });
+      const response = await apiRequest('POST', '/api/cart', { 
+        productId, 
+        quantity, 
+        telegramId: user?.id?.toString() 
+      });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart', user?.id] });
       hapticFeedback.light();
       toast({
         title: "Mahsulot qo'shildi",
@@ -54,12 +66,15 @@ export function useCart() {
         const response = await apiRequest('DELETE', `/api/cart/${cartItemId}`);
         return response.json();
       } else {
-        const response = await apiRequest('PATCH', `/api/cart/${cartItemId}`, { quantity });
+        const response = await apiRequest('PATCH', `/api/cart/${cartItemId}`, { 
+          quantity, 
+          telegramId: user?.id?.toString() 
+        });
         return response.json();
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart', user?.id] });
       hapticFeedback.selection();
     },
     onError: () => {
@@ -74,11 +89,13 @@ export function useCart() {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('DELETE', '/api/cart');
+      const response = await apiRequest('DELETE', '/api/cart', { 
+        telegramId: user?.id?.toString() 
+      });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/cart', user?.id] });
       hapticFeedback.success();
     },
   });
