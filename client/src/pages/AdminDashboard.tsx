@@ -19,7 +19,8 @@ import {
   CheckCircle,
   Clock,
   Truck,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,11 +35,10 @@ export default function AdminDashboard() {
 
   // Admin Login
   const loginMutation = useMutation({
-    mutationFn: (credentials: { telegramId: string }) =>
-      apiRequest('/api/admin/login', {
-        method: 'POST',
-        body: credentials
-      }),
+    mutationFn: async (credentials: { telegramId: string }) => {
+      const response = await apiRequest('POST', '/api/admin/login', credentials);
+      return response.json();
+    },
     onSuccess: (data) => {
       setAdminUser(data.admin);
       setIsAuthenticated(true);
@@ -58,17 +58,23 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // Queries with auth (Note: These will fail for now but show the structure)
+  // Queries with auth
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/stats'],
-    queryFn: () => apiRequest(`/api/admin/stats?telegramId=5155574276`),
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/stats?telegramId=5155574276`);
+      return response.json();
+    },
     enabled: isAuthenticated,
     retry: false
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<any[]>({
     queryKey: ['/api/admin/orders'],
-    queryFn: () => apiRequest(`/api/admin/orders?telegramId=5155574276&limit=20`),
+    queryFn: async () => {
+      const response = await fetch(`/api/admin/orders?telegramId=5155574276&limit=20`);
+      return response.json();
+    },
     enabled: isAuthenticated,
     retry: false
   });
