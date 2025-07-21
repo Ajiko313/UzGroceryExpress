@@ -28,7 +28,7 @@ import { TelegramNotificationSender } from "@/components/TelegramNotificationSen
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [adminUser, setAdminUser] = useState<any>(null);
-  const [loginForm, setLoginForm] = useState({ telegramId: "300001" });
+  const [loginForm, setLoginForm] = useState({ telegramId: "5155574276" });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
@@ -61,14 +61,14 @@ export default function AdminDashboard() {
   // Queries with auth (Note: These will fail for now but show the structure)
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/stats'],
-    queryFn: () => apiRequest(`/api/admin/stats?telegramId=300001`),
+    queryFn: () => apiRequest(`/api/admin/stats?telegramId=5155574276`),
     enabled: isAuthenticated,
     retry: false
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery<any[]>({
     queryKey: ['/api/admin/orders'],
-    queryFn: () => apiRequest(`/api/admin/orders?telegramId=300001&limit=20`),
+    queryFn: () => apiRequest(`/api/admin/orders?telegramId=5155574276&limit=20`),
     enabled: isAuthenticated,
     retry: false
   });

@@ -405,6 +405,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/admin/categories/:id", requireAdmin, async (req, res) => {
+    try {
+      const categoryId = parseInt(req.params.id);
+      await storage.updateCategory(categoryId, { isActive: false });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete category" });
+    }
+  });
+
   // Admin - Assign delivery orders
   app.post("/api/admin/assignments", requireAdmin, async (req, res) => {
     try {
@@ -417,6 +427,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(assignment);
     } catch (error) {
       res.status(500).json({ message: "Failed to create assignment" });
+    }
+  });
+
+  // Admin - Update order status
+  app.patch("/api/admin/orders/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.id);
+      const { status } = req.body;
+      await storage.updateOrderStatus(orderId, status);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Admin - Manage users
+  app.patch("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const updates = req.body;
+      await storage.updateUser(userId, updates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      await storage.updateUser(userId, { isActive: false });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to deactivate user" });
+    }
+  });
+
+  // Admin - Manage special offers
+  app.get("/api/admin/special-offers", requireAdmin, async (req, res) => {
+    try {
+      const offers = await storage.getSpecialOffers();
+      res.json(offers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch special offers" });
+    }
+  });
+
+  app.post("/api/admin/special-offers", requireAdmin, async (req: any, res) => {
+    try {
+      const offerData = { ...req.body, createdBy: req.adminUser.id };
+      const offer = await storage.createSpecialOffer(offerData);
+      res.json(offer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create special offer" });
+    }
+  });
+
+  app.patch("/api/admin/special-offers/:id", requireAdmin, async (req, res) => {
+    try {
+      const offerId = parseInt(req.params.id);
+      const updates = req.body;
+      await storage.updateSpecialOffer(offerId, updates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update special offer" });
+    }
+  });
+
+  app.delete("/api/admin/special-offers/:id", requireAdmin, async (req, res) => {
+    try {
+      const offerId = parseInt(req.params.id);
+      await storage.deleteSpecialOffer(offerId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete special offer" });
+    }
+  });
+
+  // Admin - Manage notifications
+  app.post("/api/admin/notifications", requireAdmin, async (req, res) => {
+    try {
+      const notificationData = req.body;
+      const notification = await storage.createNotification(notificationData);
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create notification" });
     }
   });
 
