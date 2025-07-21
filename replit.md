@@ -1,8 +1,8 @@
-# Restaurant Delivery App
+# Grocery Delivery Platform
 
 ## Overview
 
-This is a full-stack restaurant delivery application built for Telegram Mini Apps. The system allows customers to browse products, place orders, and track deliveries, while providing delivery agents with a dedicated dashboard to manage their assignments.
+This is a comprehensive grocery delivery platform built for Telegram Mini Apps with a separate admin web application. The system includes customer ordering, delivery agent management, real-time tracking, payment integration (Payme.uz, Click.uz), and a complete admin dashboard for store management.
 
 ## User Preferences
 
