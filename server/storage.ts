@@ -56,6 +56,15 @@ export interface IStorage {
   getDeliveryStats(deliveryAgentId: number): Promise<any>;
   createDeliveryAssignment(assignment: InsertDeliveryAssignment): Promise<DeliveryAssignment>;
   updateDeliveryStatus(orderId: number, status: string): Promise<void>;
+
+  // Admin
+  getAdminStats(): Promise<any>;
+  getAllOrders(status?: string, limit?: number): Promise<any[]>;
+  getAllUsers(role?: string, limit?: number): Promise<User[]>;
+  updateProduct(productId: number, updates: Partial<Product>): Promise<void>;
+  deleteProduct(productId: number): Promise<void>;
+  updateCategory(categoryId: number, updates: Partial<Category>): Promise<void>;
+  getDeliveryPerformance(): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -359,6 +368,131 @@ export class DatabaseStorage implements IStorage {
     if (status === 'picked_up') orderStatus = 'on_the_way';
     
     await this.updateOrderStatus(orderId, orderStatus);
+  }
+
+  // Admin methods
+  async getAdminStats(): Promise<any> {
+    // Get total counts
+    const totalOrders = await db.select().from(schema.orders);
+    const totalUsers = await db.select().from(schema.users);
+    const totalProducts = await db.select().from(schema.products);
+    const totalCategories = await db.select().from(schema.categories);
+
+    // Get recent orders
+    const recentOrders = await db.select().from(schema.orders)
+      .orderBy(desc(schema.orders.createdAt))
+      .limit(10);
+
+    // Calculate revenue
+    const revenue = await db.select({
+      total: schema.orders.total
+    }).from(schema.orders).where(eq(schema.orders.paymentStatus, 'paid'));
+
+    const totalRevenue = revenue.reduce((sum, order) => sum + parseFloat(order.total || '0'), 0);
+
+    // Count active deliveries
+    const activeDeliveries = await db.select().from(schema.orders)
+      .where(
+        // @ts-ignore - Drizzle types issue with .in() method
+        schema.orders.status.in(['accepted', 'packed', 'on_the_way'])
+      );
+
+    return {
+      totalOrders: totalOrders.length,
+      totalUsers: totalUsers.length,
+      totalProducts: totalProducts.length,
+      totalCategories: totalCategories.length,
+      totalRevenue: totalRevenue.toString(),
+      recentOrders: recentOrders.length,
+      activeDeliveries: activeDeliveries.length
+    };
+  }
+
+  async getAllOrders(status?: string, limit: number = 50): Promise<any[]> {
+    const baseQuery = db.select({
+      id: schema.orders.id,
+      status: schema.orders.status,
+      paymentMethod: schema.orders.paymentMethod,
+      paymentStatus: schema.orders.paymentStatus,
+      total: schema.orders.total,
+      createdAt: schema.orders.createdAt,
+      customer: {
+        firstName: schema.users.firstName,
+        lastName: schema.users.lastName,
+        phoneNumber: schema.users.phoneNumber,
+      },
+      address: {
+        street: schema.addresses.street,
+        city: schema.addresses.city,
+        district: schema.addresses.district,
+      }
+    })
+    .from(schema.orders)
+    .innerJoin(schema.users, eq(schema.orders.userId, schema.users.id))
+    .innerJoin(schema.addresses, eq(schema.orders.addressId, schema.addresses.id))
+    .orderBy(desc(schema.orders.createdAt))
+    .limit(limit);
+
+    if (status) {
+      return await baseQuery.where(eq(schema.orders.status, status));
+    }
+
+    return await baseQuery;
+  }
+
+  async getAllUsers(role?: string, limit: number = 100): Promise<User[]> {
+    const baseQuery = db.select().from(schema.users).limit(limit);
+    
+    if (role) {
+      return await baseQuery.where(eq(schema.users.role, role));
+    }
+    
+    return await baseQuery;
+  }
+
+  async updateProduct(productId: number, updates: Partial<Product>): Promise<void> {
+    await db.update(schema.products)
+      .set(updates)
+      .where(eq(schema.products.id, productId));
+  }
+
+  async deleteProduct(productId: number): Promise<void> {
+    await db.update(schema.products)
+      .set({ isAvailable: false })
+      .where(eq(schema.products.id, productId));
+  }
+
+  async updateCategory(categoryId: number, updates: Partial<Category>): Promise<void> {
+    await db.update(schema.categories)
+      .set(updates)
+      .where(eq(schema.categories.id, categoryId));
+  }
+
+  async getDeliveryPerformance(): Promise<any> {
+    const deliveryAgents = await db.select({
+      id: schema.users.id,
+      firstName: schema.users.firstName,
+      lastName: schema.users.lastName,
+    }).from(schema.users).where(eq(schema.users.role, 'delivery_agent'));
+
+    const performance = [];
+    for (const agent of deliveryAgents) {
+      const deliveries = await db.select().from(schema.deliveryAssignments)
+        .where(and(
+          eq(schema.deliveryAssignments.deliveryAgentId, agent.id),
+          eq(schema.deliveryAssignments.status, 'delivered')
+        ));
+
+      const totalEarnings = deliveries.reduce((sum, d) => sum + parseFloat(d.earnings || '0'), 0);
+
+      performance.push({
+        deliveryAgent: agent,
+        totalDeliveries: deliveries.length,
+        totalEarnings: totalEarnings.toString(),
+      });
+    }
+
+    return performance;
   }
 }
 
