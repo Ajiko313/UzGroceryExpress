@@ -1,0 +1,119 @@
+import TelegramBot from 'node-telegram-bot-api';
+import { storage } from './storage';
+
+let bot: TelegramBot | null = null;
+
+export function initTelegramBot() {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  
+  if (!token) {
+    console.log('⚠️ TELEGRAM_BOT_TOKEN not provided, Telegram bot features disabled');
+    return null;
+  }
+
+  try {
+    bot = new TelegramBot(token, { polling: false });
+    
+    // Set webhook for production
+    if (process.env.NODE_ENV === 'production' && process.env.TELEGRAM_WEBHOOK_URL) {
+      bot.setWebHook(process.env.TELEGRAM_WEBHOOK_URL);
+    }
+
+    console.log('✅ Telegram bot initialized successfully');
+    return bot;
+  } catch (error) {
+    console.error('❌ Failed to initialize Telegram bot:', error);
+    return null;
+  }
+}
+
+export function getTelegramBot() {
+  return bot;
+}
+
+export async function sendTelegramMessage(chatId: string | number, message: string) {
+  if (!bot) {
+    console.log('Telegram bot not initialized, message not sent:', message);
+    return;
+  }
+
+  try {
+    await bot.sendMessage(chatId, message);
+  } catch (error) {
+    console.error('Failed to send Telegram message:', error);
+  }
+}
+
+export async function notifyTelegramUsers(message: string, userRole?: string) {
+  if (!bot) return;
+
+  try {
+    // Get all users or filter by role
+    const users = await storage.getAllUsers(userRole);
+    
+    for (const user of users) {
+      if (user.telegramId) {
+        await sendTelegramMessage(user.telegramId, message);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to notify Telegram users:', error);
+  }
+}
+
+export async function handleTelegramWebhook(req: any, res: any) {
+  if (!bot) {
+    return res.status(500).json({ error: 'Bot not initialized' });
+  }
+
+  try {
+    const update = req.body;
+    
+    if (update.message) {
+      const chatId = update.message.chat.id;
+      const text = update.message.text;
+      const user = update.message.from;
+
+      // Handle /start command
+      if (text === '/start') {
+        const welcomeMessage = `Assalomu alaykum ${user.first_name}! 
+
+🛍️ Bizning yetkazib berish xizmatiga xush kelibsiz!
+
+Mini ilovani ochish uchun quyidagi tugmani bosing:`;
+
+        const keyboard = {
+          inline_keyboard: [[
+            {
+              text: "🛒 Do'konni ochish",
+              web_app: { url: process.env.TELEGRAM_WEBHOOK_URL?.replace('/api/telegram/webhook', '') || 'https://your-app.replit.app' }
+            }
+          ]]
+        };
+
+        await bot.sendMessage(chatId, welcomeMessage, { reply_markup: keyboard });
+        
+        // Create or update user in database
+        try {
+          const existingUser = await storage.getUserByTelegramId(user.id.toString());
+          if (!existingUser) {
+            await storage.createUser({
+              telegramId: user.id.toString(),
+              username: user.username,
+              firstName: user.first_name,
+              lastName: user.last_name,
+              role: 'customer'
+            });
+          }
+        } catch (error) {
+          console.error('Failed to create/update user:', error);
+        }
+      }
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error('Telegram webhook error:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+}

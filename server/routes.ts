@@ -3,8 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCartSchema, insertOrderSchema, insertAddressSchema, insertDeliveryAssignmentSchema } from "@shared/schema";
 import { z } from "zod";
+import { initTelegramBot, handleTelegramWebhook, notifyTelegramUsers } from "./telegram";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Initialize Telegram bot
+  initTelegramBot();
   
   // Initialize sample data
   await initializeSampleData();
@@ -426,6 +430,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Telegram Bot Webhook
+  app.post("/api/telegram/webhook", handleTelegramWebhook);
+
+  // Telegram Authentication
+  app.post("/api/auth/telegram", async (req, res) => {
+    try {
+      const { telegramUser } = req.body;
+      
+      if (!telegramUser?.id) {
+        return res.status(400).json({ message: "Invalid Telegram user data" });
+      }
+
+      // Find or create user
+      let user = await storage.getUserByTelegramId(telegramUser.id.toString());
+      
+      if (!user) {
+        user = await storage.createUser({
+          telegramId: telegramUser.id.toString(),
+          username: telegramUser.username,
+          firstName: telegramUser.first_name,
+          lastName: telegramUser.last_name,
+          role: 'customer'
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error('Telegram auth error:', error);
+      res.status(500).json({ message: "Authentication failed" });
+    }
+  });
+
+  // Notification broadcast to Telegram
+  app.post("/api/notifications/broadcast", async (req, res) => {
+    try {
+      const { message, userRole } = req.body;
+      
+      // Send to database notifications
+      const notification = await storage.createNotification({
+        title: 'System Notification',
+        message,
+        userId: userRole === 'admin' ? undefined : 1, // Broadcast to all if no specific user
+        type: 'system'
+      });
+
+      // Send to Telegram users
+      await notifyTelegramUsers(message, userRole);
+
+      res.json({ success: true, notification });
+    } catch (error) {
+      console.error('Broadcast error:', error);
+      res.status(500).json({ message: "Failed to broadcast notification" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
@@ -441,11 +509,14 @@ async function initializeSampleData() {
 
     console.log('🌱 Initializing sample data...');
 
-    // Create categories (smaller set for faster initialization)
+    // Create categories with attractive photos
     const categories = [
-      { nameUz: "Sabzavotlar", nameRu: "Овощи", nameEn: "Vegetables", image: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=400" },
-      { nameUz: "Mevalar", nameRu: "Фрукты", nameEn: "Fruits", image: "https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400" },
-      { nameUz: "Sut mahsulotlari", nameRu: "Молочные продукты", nameEn: "Dairy", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400" },
+      { nameUz: "Sabzavotlar", nameRu: "Овощи", nameEn: "Vegetables", image: "https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=400&h=300&fit=crop&auto=format" },
+      { nameUz: "Mevalar", nameRu: "Фрукты", nameEn: "Fruits", image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=400&h=300&fit=crop&auto=format" },
+      { nameUz: "Sut mahsulotlari", nameRu: "Молочные продукты", nameEn: "Dairy", image: "https://images.unsplash.com/photo-1559561853-08451507cbe7?w=400&h=300&fit=crop&auto=format" },
+      { nameUz: "Non mahsulotlari", nameRu: "Хлебобулочные", nameEn: "Bakery", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&auto=format" },
+      { nameUz: "Go'sht mahsulotlari", nameRu: "Мясные продукты", nameEn: "Meat", image: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&h=300&fit=crop&auto=format" },
+      { nameUz: "Ichimliklar", nameRu: "Напитки", nameEn: "Beverages", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format" },
     ];
 
     for (const category of categories) {

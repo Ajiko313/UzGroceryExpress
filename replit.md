@@ -110,4 +110,23 @@ The application uses a multi-table PostgreSQL schema:
 - **NODE_ENV**: Environment-specific configuration
 - **Session Management**: Secure session configuration for production
 
+## Recent Changes
+
+### January 21, 2025 - Major Updates
+- **Database Migration**: Successfully migrated from built-in Replit database to user's custom Supabase PostgreSQL database
+- **Telegram Bot Integration**: Added full Telegram bot support with webhook handling, automatic user authentication, and broadcasting capabilities
+- **UI Enhancements**: 
+  - Fixed gap between header and search bar by adding negative margin
+  - Added attractive category photos with optimized Unsplash images
+  - Implemented CategoryGrid component for better user experience
+  - Added Telegram notification sender component for admin use
+- **Authentication**: Implemented automatic Telegram WebApp authentication with user context
+- **Environment Configuration**: Created comprehensive .env file with all necessary API keys and configurations
+
+### Architecture Updates
+- Added `server/telegram.ts` for Telegram bot functionality
+- Created `useTelegramAuth` hook for automatic authentication
+- Enhanced database schema with proper notification and special offer tables
+- Implemented real-time notification broadcasting to Telegram users
+
 The application is designed to be deployed as a unified Express.js application serving both the API and static frontend assets, optimized for platforms like Replit, Heroku, or similar Node.js hosting providers.

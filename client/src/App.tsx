@@ -4,8 +4,9 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
-import { initTelegramApp, getUserFromTelegram } from "./lib/telegram";
+import { initTelegramApp } from "./lib/telegram";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { useTelegramAuth } from "@/hooks/useTelegramAuth";
 
 // Pages
 import Home from "@/pages/Home";
@@ -76,7 +77,7 @@ function AppHeader() {
   const [location] = useLocation();
   const { cartItemCount } = useCart();
   const { theme, toggleTheme } = useTheme();
-  const user = getUserFromTelegram();
+  const { user } = useTelegramAuth();
 
   // Don't show header on certain pages
   if (location.startsWith('/delivery') || location === '/checkout' || location === '/cart' || location === '/order-tracking') {
@@ -92,7 +93,7 @@ function AppHeader() {
             <h1 className="text-lg font-semibold">Oziq-ovqat yetkazib berish</h1>
             {user && (
               <p className="text-xs text-muted-foreground">
-                Assalomu alaykum, {user.first_name}!
+                Assalomu alaykum, {user.firstName}!
               </p>
             )}
           </div>
