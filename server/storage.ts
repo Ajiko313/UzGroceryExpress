@@ -14,7 +14,9 @@ import type {
   Order, InsertOrder,
   OrderItem, InsertOrderItem,
   DeliveryAssignment, InsertDeliveryAssignment,
-  CartItem, InsertCartItem
+  CartItem, InsertCartItem,
+  Notification, InsertNotification,
+  SpecialOffer, InsertSpecialOffer
 } from "@shared/schema";
 
 export interface IStorage {
@@ -65,6 +67,19 @@ export interface IStorage {
   deleteProduct(productId: number): Promise<void>;
   updateCategory(categoryId: number, updates: Partial<Category>): Promise<void>;
   getDeliveryPerformance(): Promise<any>;
+
+  // Notifications
+  getNotifications(userId?: number): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(notificationId: number): Promise<void>;
+  markAllNotificationsAsRead(userId?: number): Promise<void>;
+
+  // Special Offers
+  getActiveSpecialOffers(): Promise<SpecialOffer[]>;
+  getSpecialOffers(): Promise<SpecialOffer[]>;
+  createSpecialOffer(offer: InsertSpecialOffer): Promise<SpecialOffer>;
+  updateSpecialOffer(offerId: number, updates: Partial<SpecialOffer>): Promise<void>;
+  deleteSpecialOffer(offerId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -493,6 +508,76 @@ export class DatabaseStorage implements IStorage {
     }
 
     return performance;
+  }
+
+  // Notifications
+  async getNotifications(userId?: number): Promise<Notification[]> {
+    if (userId) {
+      // Get user-specific notifications
+      const notifications = await db.select().from(schema.notifications)
+        .where(eq(schema.notifications.userId, userId))
+        .orderBy(desc(schema.notifications.createdAt));
+      return notifications;
+    }
+    // Get all global notifications (where userId is null)
+    const notifications = await db.select().from(schema.notifications)
+      .orderBy(desc(schema.notifications.createdAt));
+    return notifications;
+  }
+
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [created] = await db.insert(schema.notifications).values(notification).returning();
+    return created;
+  }
+
+  async markNotificationAsRead(notificationId: number): Promise<void> {
+    await db.update(schema.notifications)
+      .set({ isRead: true })
+      .where(eq(schema.notifications.id, notificationId));
+  }
+
+  async markAllNotificationsAsRead(userId?: number): Promise<void> {
+    const query = db.update(schema.notifications).set({ isRead: true });
+    if (userId) {
+      await query.where(eq(schema.notifications.userId, userId));
+    } else {
+      await query.where(eq(schema.notifications.userId, null as any));
+    }
+  }
+
+  // Special Offers
+  async getActiveSpecialOffers(): Promise<SpecialOffer[]> {
+    const now = new Date();
+    const offers = await db.select().from(schema.specialOffers)
+      .where(and(
+        eq(schema.specialOffers.isActive, true),
+        // @ts-ignore
+        schema.specialOffers.endsAt > now
+      ))
+      .orderBy(desc(schema.specialOffers.createdAt));
+    return offers;
+  }
+
+  async getSpecialOffers(): Promise<SpecialOffer[]> {
+    const offers = await db.select().from(schema.specialOffers)
+      .orderBy(desc(schema.specialOffers.createdAt));
+    return offers;
+  }
+
+  async createSpecialOffer(offer: InsertSpecialOffer): Promise<SpecialOffer> {
+    const [created] = await db.insert(schema.specialOffers).values(offer).returning();
+    return created;
+  }
+
+  async updateSpecialOffer(offerId: number, updates: Partial<SpecialOffer>): Promise<void> {
+    await db.update(schema.specialOffers)
+      .set(updates)
+      .where(eq(schema.specialOffers.id, offerId));
+  }
+
+  async deleteSpecialOffer(offerId: number): Promise<void> {
+    await db.delete(schema.specialOffers)
+      .where(eq(schema.specialOffers.id, offerId));
   }
 }
 

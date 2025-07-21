@@ -9,6 +9,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize sample data
   await initializeSampleData();
 
+  // Notifications
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const notifications = await storage.getNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const notificationId = parseInt(req.params.id);
+      await storage.markNotificationAsRead(notificationId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+      const userId = req.body.userId;
+      await storage.markAllNotificationsAsRead(userId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Special Offers
+  app.get("/api/special-offers", async (req, res) => {
+    try {
+      const offers = await storage.getActiveSpecialOffers();
+      res.json(offers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch special offers" });
+    }
+  });
+
   // Categories
   app.get("/api/categories", async (req, res) => {
     try {

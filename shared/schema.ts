@@ -95,6 +95,33 @@ export const cart = pgTable("cart", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type", { enum: ["order", "promotion", "system", "delivery"] }).default("system").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at"),
+});
+
+// Special offers table
+export const specialOffers = pgTable("special_offers", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  discountPercentage: integer("discount_percentage").notNull(),
+  categoryId: integer("category_id").references(() => categories.id),
+  productId: integer("product_id").references(() => products.id),
+  isActive: boolean("is_active").default(true).notNull(),
+  startsAt: timestamp("starts_at").defaultNow().notNull(),
+  endsAt: timestamp("ends_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdBy: integer("created_by").references(() => users.id).notNull(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -133,6 +160,16 @@ export const insertCartSchema = createInsertSchema(cart).omit({
   createdAt: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSpecialOfferSchema = createInsertSchema(specialOffers).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -157,3 +194,9 @@ export type InsertDeliveryAssignment = z.infer<typeof insertDeliveryAssignmentSc
 
 export type CartItem = typeof cart.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export type SpecialOffer = typeof specialOffers.$inferSelect;
+export type InsertSpecialOffer = z.infer<typeof insertSpecialOfferSchema>;
