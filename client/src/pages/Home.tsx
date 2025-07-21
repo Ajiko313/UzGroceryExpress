@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AdvancedSearch } from "@/components/AdvancedSearch";
 import { ProductCard } from "@/components/ProductCard";
+import { SpecialOffersBanner } from "@/components/SpecialOffersBanner";
 import { useCart } from "@/hooks/useCart";
 
 interface Category {
@@ -112,8 +113,13 @@ export default function Home() {
 
   return (
     <div className="pb-20">
-      {/* Sticky Search Section */}
-      <div className={`sticky top-16 z-40 transition-all duration-300 ${isScrolled ? 'sticky-header shadow-sm' : 'bg-background'}`}>
+      {/* Special Offers Banner */}
+      <div className="px-4 pt-4">
+        <SpecialOffersBanner />
+      </div>
+
+      {/* Sticky Search Section - No gap */}
+      <div className={`sticky top-16 z-40 transition-all duration-300 bg-background border-b border-border/50`}>
         <div className="px-4 py-3">
           <AdvancedSearch 
             filters={filters} 
@@ -123,14 +129,17 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sticky Category Tabs */}
-      <div className={`sticky top-32 z-30 transition-all duration-300 ${isScrolled ? 'sticky-header shadow-sm' : 'bg-background border-b border-border'}`}>
+      {/* Sticky Category Tabs - Connected to search */}
+      <div className={`sticky top-[7.5rem] z-30 transition-all duration-300 bg-background border-b border-border`}>
         <div className="px-4 py-3">
           <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
             <Button
               variant={selectedCategory === null ? "default" : "secondary"}
               size="sm"
-              onClick={() => setSelectedCategory(null)}
+              onClick={() => {
+                setSelectedCategory(null);
+                setFilters(prev => ({ ...prev, category: 'all' }));
+              }}
               className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
             >
               Barchasi
@@ -140,7 +149,10 @@ export default function Home() {
                 key={category.id}
                 variant={selectedCategory === category.id ? "default" : "secondary"}
                 size="sm"
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => {
+                  setSelectedCategory(category.id);
+                  setFilters(prev => ({ ...prev, category: category.id.toString() }));
+                }}
                 className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
               >
                 {category.nameUz}

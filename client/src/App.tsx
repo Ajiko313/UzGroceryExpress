@@ -24,6 +24,7 @@ import { ShoppingBasket, Bell, ShoppingCart, Home as HomeIcon, Receipt, User, Tr
 import { Link, useLocation } from "wouter";
 import { useCart } from "@/hooks/useCart";
 import { useTheme } from "@/contexts/ThemeContext";
+import { NotificationDropdown } from "@/components/NotificationDropdown";
 
 function BottomNavigation() {
   const [location] = useLocation();
@@ -110,12 +111,7 @@ function AppHeader() {
             )}
           </Button>
           
-          <Button variant="ghost" size="sm" className="relative p-2">
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <Badge className="absolute -top-1 -right-1 bg-warning-orange text-white text-xs w-4 h-4 flex items-center justify-center p-0">
-              3
-            </Badge>
-          </Button>
+          <NotificationDropdown />
           
           <Link href="/cart">
             <Button variant="ghost" size="sm" className="relative p-2">

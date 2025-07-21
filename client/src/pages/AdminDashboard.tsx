@@ -189,10 +189,11 @@ export default function AdminDashboard() {
 
       <div className="container py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
+            <TabsTrigger value="offers">Special Offers</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
 
@@ -370,6 +371,49 @@ export default function AdminDashboard() {
                     </TableBody>
                   </Table>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Special Offers Tab */}
+          <TabsContent value="offers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  Special Offers Management
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Offer
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Alert className="mb-4">
+                  <TrendingUp className="h-4 w-4" />
+                  <AlertDescription>
+                    Manage special offers and promotions. Create targeted discounts for categories or specific products to boost sales.
+                  </AlertDescription>
+                </Alert>
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-orange-900">🔥 Meva-sabzavot maxsus taklifi</h3>
+                        <p className="text-sm text-orange-700">20% chegirma - Expires in 6 days</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-blue-900">🥛 Sut mahsulotlari aksiyasi</h3>
+                        <p className="text-sm text-blue-700">15% chegirma - Expires in 4 days</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
