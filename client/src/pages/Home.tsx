@@ -12,6 +12,10 @@ import { useTelegramAuth } from "@/hooks/useTelegramAuth";
 interface Category {
   id: number;
   nameUz: string;
+  nameRu?: string;
+  nameEn?: string;
+  image?: string;
+  isActive: boolean;
 }
 
 interface Product {
@@ -72,8 +76,8 @@ export default function Home() {
     },
   });
 
-  // Apply filters and sorting
-  const filteredProducts = products.filter(product => {
+  // Apply filters and sorting - ensure products is an array
+  const filteredProducts = Array.isArray(products) ? products.filter(product => {
     // Category filter
     const categoryFilter = filters.category === 'all' || product.categoryId === parseInt(filters.category);
     
@@ -113,7 +117,7 @@ export default function Home() {
       default:
         return a.nameUz.localeCompare(b.nameUz);
     }
-  });
+  }) : [];
 
   return (
     <div className="pb-20">
@@ -175,7 +179,7 @@ export default function Home() {
           </div>
         ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((product, index) => (
+            {filteredProducts.map((product: Product, index: number) => (
               <div 
                 key={product.id}
                 className="animate-slide-up"
