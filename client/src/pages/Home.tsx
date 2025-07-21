@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { AdvancedSearch } from "@/components/AdvancedSearch";
 import { ProductCard } from "@/components/ProductCard";
 import { SpecialOffersBanner } from "@/components/SpecialOffersBanner";
+import { CategoryGrid } from "@/components/CategoryGrid";
 import { useCart } from "@/hooks/useCart";
+import { useTelegramAuth } from "@/hooks/useTelegramAuth";
 
 interface Category {
   id: number;
@@ -39,8 +41,10 @@ export default function Home() {
     category: 'all'
   });
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showCategoryGrid, setShowCategoryGrid] = useState(true);
   
   const { addToCart, isAddingToCart } = useCart();
+  const { user, isLoading: authLoading } = useTelegramAuth();
 
   // Handle scroll for sticky headers
   useEffect(() => {
@@ -118,8 +122,24 @@ export default function Home() {
         <SpecialOffersBanner />
       </div>
 
-      {/* Sticky Search Section - No gap */}
-      <div className={`sticky top-16 z-40 transition-all duration-300 bg-background border-b border-border/50`}>
+      {/* Category Grid - Show when no search/filter active */}
+      {showCategoryGrid && !filters.query && filters.category === 'all' && (
+        <CategoryGrid 
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={(categoryId) => {
+            setSelectedCategory(categoryId);
+            setFilters(prev => ({ 
+              ...prev, 
+              category: categoryId ? categoryId.toString() : 'all' 
+            }));
+            setShowCategoryGrid(false);
+          }}
+        />
+      )}
+
+      {/* Sticky Search Section - Moved up to close gap */}
+      <div className={`sticky top-16 z-40 transition-all duration-300 bg-background border-b border-border/50 -mt-2`}>
         <div className="px-4 py-3">
           <AdvancedSearch 
             filters={filters} 
@@ -129,38 +149,41 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sticky Category Tabs - Connected to search */}
-      <div className={`sticky top-[7.5rem] z-30 transition-all duration-300 bg-background border-b border-border`}>
-        <div className="px-4 py-3">
-          <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
-            <Button
-              variant={selectedCategory === null ? "default" : "secondary"}
-              size="sm"
-              onClick={() => {
-                setSelectedCategory(null);
-                setFilters(prev => ({ ...prev, category: 'all' }));
-              }}
-              className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
-            >
-              Barchasi
-            </Button>
-            {categories.map((category) => (
+      {/* Sticky Category Tabs - Show when category grid is hidden */}
+      {!showCategoryGrid && (
+        <div className={`sticky top-[7.5rem] z-30 transition-all duration-300 bg-background border-b border-border`}>
+          <div className="px-4 py-3">
+            <div className="flex space-x-2 overflow-x-auto hide-scrollbar pb-1">
               <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "secondary"}
+                variant={selectedCategory === null ? "default" : "secondary"}
                 size="sm"
                 onClick={() => {
-                  setSelectedCategory(category.id);
-                  setFilters(prev => ({ ...prev, category: category.id.toString() }));
+                  setSelectedCategory(null);
+                  setFilters(prev => ({ ...prev, category: 'all' }));
+                  setShowCategoryGrid(true);
                 }}
                 className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
               >
-                {category.nameUz}
+                Barchasi
               </Button>
-            ))}
+              {categories.map((category) => (
+                <Button
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "secondary"}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedCategory(category.id);
+                    setFilters(prev => ({ ...prev, category: category.id.toString() }));
+                  }}
+                  className="whitespace-nowrap rounded-full flex-shrink-0 animate-scale-in"
+                >
+                  {category.nameUz}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Results Summary */}
       {!isLoading && (
