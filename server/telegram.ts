@@ -73,41 +73,73 @@ export async function handleTelegramWebhook(req: any, res: any) {
       const chatId = update.message.chat.id;
       const text = update.message.text;
       const user = update.message.from;
+      
+      // Create or find user in database
+      let dbUser = await storage.getUserByTelegramId(user.id.toString());
+      if (!dbUser) {
+        dbUser = await storage.createUser({
+          telegramId: user.id.toString(),
+          username: user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          role: 'customer'
+        });
+      }
 
-      // Handle /start command
       if (text === '/start') {
-        const welcomeMessage = `Assalomu alaykum ${user.first_name}! 
-
-🛍️ Bizning yetkazib berish xizmatiga xush kelibsiz!
-
-Mini ilovani ochish uchun quyidagi tugmani bosing:`;
-
-        const keyboard = {
-          inline_keyboard: [[
-            {
-              text: "🛒 Do'konni ochish",
-              web_app: { url: process.env.TELEGRAM_WEBHOOK_URL?.replace('/api/telegram/webhook', '') || 'https://your-app.replit.app' }
-            }
-          ]]
-        };
-
-        await bot.sendMessage(chatId, welcomeMessage, { reply_markup: keyboard });
+        const webAppUrl = process.env.NODE_ENV === 'production' 
+          ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`
+          : 'https://3f306987-154e-43c1-95c7-23a8ebe4e4c1-00-373p6j1y25mqd.spock.replit.dev';
         
-        // Create or update user in database
-        try {
-          const existingUser = await storage.getUserByTelegramId(user.id.toString());
-          if (!existingUser) {
-            await storage.createUser({
-              telegramId: user.id.toString(),
-              username: user.username,
-              firstName: user.first_name,
-              lastName: user.last_name,
-              role: 'customer'
-            });
+        await bot.sendMessage(chatId, 
+          `🛍️ Xush kelibsiz bizning yetkazib berish xizmatiga!\n\nBozorni ochish uchun quyidagi tugmani bosing:`, 
+          {
+            reply_markup: {
+              inline_keyboard: [[
+                {
+                  text: "🛒 Bozorni ochish",
+                  web_app: { url: webAppUrl }
+                }
+              ]]
+            }
           }
-        } catch (error) {
-          console.error('Failed to create/update user:', error);
-        }
+        );
+      } else if (text === '/admin' && dbUser.role === 'admin') {
+        const webAppUrl = process.env.NODE_ENV === 'production' 
+          ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/admin`
+          : 'https://3f306987-154e-43c1-95c7-23a8ebe4e4c1-00-373p6j1y25mqd.spock.replit.dev/admin';
+        
+        await bot.sendMessage(chatId, 
+          `👨‍💼 Admin paneliga xush kelibsiz!`, 
+          {
+            reply_markup: {
+              inline_keyboard: [[
+                {
+                  text: "⚙️ Admin Panel",
+                  web_app: { url: webAppUrl }
+                }
+              ]]
+            }
+          }
+        );
+      } else if (text === '/orders') {
+        const webAppUrl = process.env.NODE_ENV === 'production' 
+          ? `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/orders`
+          : 'https://3f306987-154e-43c1-95c7-23a8ebe4e4c1-00-373p6j1y25mqd.spock.replit.dev/orders';
+        
+        await bot.sendMessage(chatId, 
+          `📦 Buyurtmalaringizni ko'rish uchun:`, 
+          {
+            reply_markup: {
+              inline_keyboard: [[
+                {
+                  text: "📋 Buyurtmalarim",
+                  web_app: { url: webAppUrl }
+                }
+              ]]
+            }
+          }
+        );
       }
     }
 
